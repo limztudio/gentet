@@ -1,28 +1,50 @@
 #include "pch.h"
 
-#include <map>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #include <combaseapi.h>
 #include <Fade_3D.h>
 
 
+struct Point3Hasher{
+    inline size_t operator()(const FADE3D::Point3& key)const{
+        return std::hash<std::string>{}(std::to_string(key.x()) + "," + std::to_string(key.y()) + "," + std::to_string(key.z()));
+    }
+};
+
+
+static std::unordered_map<FADE3D::Point3, unsigned long, Point3Hasher> glb_pointIndexer;
+static std::vector<FADE3D::Point3> glb_tmpPointTable;
+
 static unsigned long glb_tetIndexCount = 0u;
 static unsigned long* glb_tetIndices = nullptr;
 
 
-extern "C" __declspec(dllexport) void _cdecl TGBuildTets(float* vertices, unsigned long numVert){
-    std::map<FADE3D::Point3, unsigned long> pointIndexer;
+extern "C" __declspec(dllexport) bool _cdecl TGBuildTets(float* vertices, unsigned long numVert){
     FADE3D::Fade_3D fade3D;
 
-    {
-        unsigned long uIndex = 0u;
-        for(auto* pVert = vertices; (pVert - vertices) < numVert;){
-            FADE3D::Point3 pt(*pVert++, *pVert++, *pVert++);
-            fade3D.insert(pt);
+    if(numVert % 3)
+        return false;
 
-            if(pointIndexer.emplace(pt, uIndex).second)
+    {
+        glb_pointIndexer.clear();
+        glb_tmpPointTable.clear();
+
+        glb_pointIndexer.rehash(1 << 17);
+        glb_tmpPointTable.reserve(numVert / 3);
+
+        unsigned long uIndex = 0u;
+        for(auto i = decltype(numVert){ 0 }; i < numVert; i += 3){
+            FADE3D::Point3 pt(vertices[i], vertices[i + 1], vertices[i + 2]);
+            if(glb_pointIndexer.emplace(pt, uIndex).second){
+                glb_tmpPointTable.emplace_back(pt);
                 ++uIndex;
+            }
         }
+
+        fade3D.insert(glb_tmpPointTable);
     }
 
     std::vector<FADE3D::Tet3*> tets;
@@ -40,8 +62,8 @@ extern "C" __declspec(dllexport) void _cdecl TGBuildTets(float* vertices, unsign
         pTet->getCorners(pts[0], pts[1], pts[2], pts[3]);
 
         for(const auto* pt : pts){
-            auto fIt = pointIndexer.find(*pt);
-            if(fIt != pointIndexer.cend())
+            auto fIt = glb_pointIndexer.find(*pt);
+            if(fIt != glb_pointIndexer.cend())
                 *pTetIndex = fIt->second;
             else
                 *pTetIndex = 0xffffffff;
@@ -49,6 +71,8 @@ extern "C" __declspec(dllexport) void _cdecl TGBuildTets(float* vertices, unsign
             ++pTetIndex;
         }
     }
+
+    return true;
 }
 extern "C" __declspec(dllexport) unsigned long _cdecl TGGetTetIndexCount(void){
     return glb_tetIndexCount;
