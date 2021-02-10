@@ -10,13 +10,13 @@ static unsigned long glb_tetIndexCount = 0u;
 static unsigned long* glb_tetIndices = nullptr;
 
 
-extern "C" __declspec(dllexport) void _cdecl BuildTets(float* vertices, unsigned long numVert){
+extern "C" __declspec(dllexport) void _cdecl TGBuildTets(float* vertices, unsigned long numVert){
     std::map<FADE3D::Point3, unsigned long> pointIndexer;
     FADE3D::Fade_3D fade3D;
 
     {
         unsigned long uIndex = 0u;
-        for(auto* pVert = vertices; (vertices - pVert) < numVert;){
+        for(auto* pVert = vertices; (pVert - vertices) < numVert;){
             FADE3D::Point3 pt(*pVert++, *pVert++, *pVert++);
             fade3D.insert(pt);
 
@@ -37,7 +37,7 @@ extern "C" __declspec(dllexport) void _cdecl BuildTets(float* vertices, unsigned
     auto* pTetIndex = glb_tetIndices;
     for(const auto* pTet : tets){
         FADE3D::Point3* pts[4];
-        tets[0]->getCorners(pts[0], pts[1], pts[2], pts[3]);
+        pTet->getCorners(pts[0], pts[1], pts[2], pts[3]);
 
         for(const auto* pt : pts){
             auto fIt = pointIndexer.find(*pt);
@@ -50,13 +50,13 @@ extern "C" __declspec(dllexport) void _cdecl BuildTets(float* vertices, unsigned
         }
     }
 }
-extern "C" __declspec(dllexport) unsigned long _cdecl GetTetIndexCount(void){
+extern "C" __declspec(dllexport) unsigned long _cdecl TGGetTetIndexCount(void){
     return glb_tetIndexCount;
 }
-extern "C" __declspec(dllexport) unsigned long* _cdecl GetTetIndices(void){
+extern "C" __declspec(dllexport) unsigned long* _cdecl TGGetTetIndices(void){
     return glb_tetIndices;
 }
-extern "C" __declspec(dllexport) void _cdecl Cleanup(void){
+extern "C" __declspec(dllexport) void _cdecl TGCleanup(void){
     if(glb_tetIndices){
         glb_tetIndexCount = 0u;
 
