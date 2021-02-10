@@ -13,13 +13,16 @@ struct Point3Hasher{
         return std::hash<std::string>{}(std::to_string(key.x()) + "," + std::to_string(key.y()) + "," + std::to_string(key.z()));
     }
 };
+#pragma pack(push, 1)
+struct Uint4{
+    unsigned long raw[4];
+};
+#pragma pack(pop)
 
 
 static std::unordered_map<FADE3D::Point3, unsigned long, Point3Hasher> glb_pointIndexer;
 static std::vector<FADE3D::Point3> glb_tmpPointTable;
-
-static unsigned long glb_tetIndexCount = 0u;
-static unsigned long* glb_tetIndices = nullptr;
+static std::vector<Uint4> glb_tmpTetIndices;
 
 
 extern "C" __declspec(dllexport) bool _cdecl TGBuildTets(float* vertices, unsigned long numVert){
@@ -50,43 +53,27 @@ extern "C" __declspec(dllexport) bool _cdecl TGBuildTets(float* vertices, unsign
     std::vector<FADE3D::Tet3*> tets;
     fade3D.getTetrahedra(tets);
 
-    if(glb_tetIndices)
-        CoTaskMemFree(glb_tetIndices);
+    glb_tmpTetIndices.clear();
+    glb_tmpTetIndices.resize(tets.size());
 
-    glb_tetIndexCount = decltype(glb_tetIndexCount)(tets.size() << 2);
-    glb_tetIndices = decltype(glb_tetIndices)(CoTaskMemAlloc(sizeof(unsigned long) * glb_tetIndexCount));
-
-    auto* pTetIndex = glb_tetIndices;
-    for(const auto* pTet : tets){
+    auto itOutIndices = glb_tmpTetIndices.begin();
+    for(auto itTet = tets.cbegin(), etTet = tets.cend(); itTet != etTet; ++itTet, ++itOutIndices){
         FADE3D::Point3* pts[4];
-        pTet->getCorners(pts[0], pts[1], pts[2], pts[3]);
+        (*itTet)->getCorners(pts[0], pts[1], pts[2], pts[3]);
 
-        for(const auto* pt : pts){
-            auto fIt = glb_pointIndexer.find(*pt);
-            if(fIt != glb_pointIndexer.cend())
-                *pTetIndex = fIt->second;
-            else
-                *pTetIndex = 0xffffffff;
-
-            ++pTetIndex;
+        for(size_t idx = 0; idx < _countof(pts); ++idx){
+            auto fIt = glb_pointIndexer.find(*pts[idx]);
+            itOutIndices->raw[idx] = (fIt != glb_pointIndexer.cend()) ? fIt->second : 0xffffffff;
         }
     }
 
     return true;
 }
 extern "C" __declspec(dllexport) unsigned long _cdecl TGGetTetIndexCount(void){
-    return glb_tetIndexCount;
+    return (unsigned long)(glb_tmpTetIndices.size() << 2);
 }
-extern "C" __declspec(dllexport) unsigned long* _cdecl TGGetTetIndices(void){
-    return glb_tetIndices;
-}
-extern "C" __declspec(dllexport) void _cdecl TGCleanup(void){
-    if(glb_tetIndices){
-        glb_tetIndexCount = 0u;
-
-        CoTaskMemFree(glb_tetIndices);
-        glb_tetIndices = nullptr;
-    }
+extern "C" __declspec(dllexport) void _cdecl TGGetTetIndices(unsigned long* vOut){
+    CopyMemory(vOut, glb_tmpTetIndices.data(), glb_tmpTetIndices.size() * sizeof(Uint4));
 }
 
 

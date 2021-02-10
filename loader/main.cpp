@@ -5,8 +5,7 @@
 
 typedef bool(_cdecl*_TGBuildTets)(float* vertices, unsigned long numVert);
 typedef unsigned long(_cdecl*_TGGetTetIndexCount)(void);
-typedef unsigned long*(_cdecl*_TGGetTetIndices)(void);
-typedef void(_cdecl*_TGCleanup)(void);
+typedef void(_cdecl*_TGGetTetIndices)(unsigned long* vOut);
 
 
 struct Uint4{
@@ -24,7 +23,6 @@ int main(){
     _TGBuildTets TGBuildTets = reinterpret_cast<_TGBuildTets>(GetProcAddress(pLibrary, "TGBuildTets"));
     _TGGetTetIndexCount TGGetTetIndexCount = reinterpret_cast<_TGGetTetIndexCount>(GetProcAddress(pLibrary, "TGGetTetIndexCount"));
     _TGGetTetIndices TGGetTetIndices = reinterpret_cast<_TGGetTetIndices>(GetProcAddress(pLibrary, "TGGetTetIndices"));
-    _TGCleanup TGCleanup = reinterpret_cast<_TGCleanup>(GetProcAddress(pLibrary, "TGCleanup"));
 
     //float vertices[] = {
     //    0, 0, 0,
@@ -41,9 +39,7 @@ int main(){
     TGBuildTets(vertices, _countof(vertices));
 
     std::vector<Uint4> indices(TGGetTetIndexCount() >> 2);
-    CopyMemory(indices.data(), TGGetTetIndices(), indices.size() * sizeof(Uint4));
-
-    TGCleanup();
+    TGGetTetIndices((unsigned long*)indices.data());
 
     FreeLibrary(pLibrary);
     return 0;
