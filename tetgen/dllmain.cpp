@@ -41,6 +41,13 @@ union float4x3{
 };
 #pragma pack(pop)
 
+struct tetrahedron{
+    float3 v[4];
+};
+struct octahedron{
+    float3 v[6];
+};
+
 
 static std::vector<FADE3D::Tet3*> glb_tetList;
 static std::unordered_map<FADE3D::Tet3*, unsigned long> glb_tetToIndex;
@@ -51,6 +58,37 @@ static std::vector<uint4> glb_tmpIntraIndices;
 static std::vector<uint4> glb_tmpTetAdjIndices;
 static std::vector<float4x3> glb_tmpTetBaryMatrices;
 
+
+static bool lcl_equal(const float3& lhs, const float3& rhs){
+    if(lhs.x != rhs.x)
+        return false;
+    if(lhs.y != rhs.y)
+        return false;
+    if(lhs.z != rhs.z)
+        return false;
+    return true;
+}
+
+static float3 lcl_lerp(const float3& v0, const float3& v1, float t){
+    float3 v = { v0.x + t * (v1.x - v0.x), v0.y + t * (v1.y - v0.y), v0.z + t * (v1.z - v0.z) };
+    return v;
+}
+static float3 lcl_middle(const float3& v0, const float3& v1){
+    float3 v = { (v1.x + v0.x) * 0.5f, (v1.y + v0.y) * 0.5f, (v1.z + v0.z) * 0.5f };
+    return v;
+}
+static float3 lcl_centroid(const octahedron& oc){
+    float3 vO = { 0.f, 0.f, 0.f };
+    for(const auto& vC : oc.v){
+        vO.x += vC.x;
+        vO.y += vC.y;
+        vO.z += vC.z;
+    }
+    vO.x /= float(_countof(octahedron::v));
+    vO.y /= float(_countof(octahedron::v));
+    vO.z /= float(_countof(octahedron::v));
+    return vO;
+}
 
 static void lcl_makeBaryMatrix(const float3& v0, const float3& v1, const float3& v2, const float3& v3, float4x3* mOut){
     {
@@ -195,6 +233,85 @@ extern "C" __declspec(dllexport) void _cdecl TGGetTetAjacentIndices(unsigned lon
 extern "C" __declspec(dllexport) void _cdecl TGGetTetBaryMatrices(float* vOut){
     CopyMemory(vOut, glb_tmpTetBaryMatrices.data(), glb_tmpTetBaryMatrices.size() * sizeof(float4x3));
 }
+
+
+// not a good idea, but let's just hard-code to do it.
+
+// input: 4 vertices of tet
+// output: every 4 vertices of 4 tets and 6 vertices of oct
+extern "C" __declspec(dllexport) bool _cdecl TGSubdivideTet(const float* pRawInputTetVerts, float* pRawOutputTetsVerts, float* pRawOutputOctVerts){
+    const auto* pInputTet = reinterpret_cast<const tetrahedron*>(pRawInputTetVerts);
+
+    auto* pOutputTets = reinterpret_cast<tetrahedron*>(pRawOutputTetsVerts);
+    auto* pOutputOct = reinterpret_cast<octahedron*>(pRawOutputOctVerts);
+
+    const auto& vP0 = pInputTet->v[0];
+    const auto& vP1 = pInputTet->v[1];
+    const auto& vP2 = pInputTet->v[2];
+    const auto& vP3 = pInputTet->v[3];
+
+    const auto vM01 = lcl_middle(vP0, vP1);
+    const auto vM02 = lcl_middle(vP0, vP2);
+    const auto vM03 = lcl_middle(vP0, vP3);
+    const auto vM12 = lcl_middle(vP1, vP2);
+    const auto vM13 = lcl_middle(vP1, vP3);
+    const auto vM23 = lcl_middle(vP2, vP3);
+
+    pOutputTets[0].v[0] = vP0;
+    pOutputTets[0].v[1] = vM01;
+    pOutputTets[0].v[2] = vM02;
+    pOutputTets[0].v[3] = vM03;
+
+    pOutputTets[1].v[0] = vP1;
+    pOutputTets[1].v[1] = vM01;
+    pOutputTets[1].v[2] = vM12;
+    pOutputTets[1].v[3] = vM13;
+
+    pOutputTets[2].v[0] = vP2;
+    pOutputTets[2].v[1] = vM02;
+    pOutputTets[2].v[2] = vM12;
+    pOutputTets[2].v[3] = vM23;
+
+    pOutputTets[3].v[0] = vP3;
+    pOutputTets[3].v[1] = vM03;
+    pOutputTets[3].v[2] = vM13;
+    pOutputTets[3].v[3] = vM23;
+
+    pOutputOct->v[0] = vM03;
+    pOutputOct->v[1] = vM01;
+    pOutputOct->v[2] = vM02;
+    pOutputOct->v[3] = vM23;
+    pOutputOct->v[4] = vM13;
+    pOutputOct->v[5] = vM12;
+}
+// input: 6 vertices of oct
+// output: every 4 vertices of 8 tets and every 6 vertices of 6 octs
+extern "C" __declspec(dllexport) bool _cdecl TGSubdivideOct(const float* pRawInputOctVerts, float* pRawOutputTetsVerts, float* pRawOutputOctsVerts){
+    const auto* pInputOct = reinterpret_cast<const octahedron*>(pRawInputOctVerts);
+
+    const auto& vP0 = pInputOct->v[0];
+    const auto& vP1 = pInputOct->v[1];
+    const auto& vP2 = pInputOct->v[2];
+    const auto& vP3 = pInputOct->v[3];
+    const auto& vP4 = pInputOct->v[4];
+    const auto& vP5 = pInputOct->v[5];
+
+    const auto vM01 = lcl_middle(vP0, vP1);
+    const auto vM02 = lcl_middle(vP0, vP2);
+    const auto vM03 = lcl_middle(vP0, vP3);
+    const auto vM04 = lcl_middle(vP0, vP4);
+    const auto vM12 = lcl_middle(vP1, vP2);
+    const auto vM14 = lcl_middle(vP1, vP4);
+    const auto vM15 = lcl_middle(vP1, vP5);
+    const auto vM23 = lcl_middle(vP2, vP3);
+    const auto vM25 = lcl_middle(vP2, vP5);
+    const auto vM34 = lcl_middle(vP3, vP4);
+    const auto vM35 = lcl_middle(vP3, vP5);
+    const auto vM45 = lcl_middle(vP4, vP5);
+
+
+}
+
 
 
 BOOL APIENTRY DllMain(
