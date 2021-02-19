@@ -309,7 +309,7 @@ extern "C" __declspec(dllexport) bool _cdecl TGSubdivideOct(const float* pRawInp
     const auto vM35 = lcl_middle(vP3, vP5);
     const auto vM45 = lcl_middle(vP4, vP5);
 
-
+    const auto vC = lcl_centroid(*pInputOct);
 }
 
 
