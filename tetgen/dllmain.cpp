@@ -289,6 +289,9 @@ extern "C" __declspec(dllexport) bool _cdecl TGSubdivideTet(const float* pRawInp
 extern "C" __declspec(dllexport) bool _cdecl TGSubdivideOct(const float* pRawInputOctVerts, float* pRawOutputTetsVerts, float* pRawOutputOctsVerts){
     const auto* pInputOct = reinterpret_cast<const octahedron*>(pRawInputOctVerts);
 
+    auto* pOutputTets = reinterpret_cast<tetrahedron*>(pRawOutputTetsVerts);
+    auto* pOutputOcts = reinterpret_cast<octahedron*>(pRawOutputOctsVerts);
+
     const auto& vP0 = pInputOct->v[0];
     const auto& vP1 = pInputOct->v[1];
     const auto& vP2 = pInputOct->v[2];
@@ -310,6 +313,60 @@ extern "C" __declspec(dllexport) bool _cdecl TGSubdivideOct(const float* pRawInp
     const auto vM45 = lcl_middle(vP4, vP5);
 
     const auto vC = lcl_centroid(*pInputOct);
+
+    pOutputTets[0].v[0] = vM01;
+    pOutputTets[0].v[1] = vM02;
+    pOutputTets[0].v[2] = vM12;
+    pOutputTets[0].v[3] = vC;
+
+    pOutputTets[1].v[0] = vM02;
+    pOutputTets[1].v[1] = vM03;
+    pOutputTets[1].v[2] = vM23;
+    pOutputTets[1].v[3] = vC;
+
+    pOutputTets[2].v[0] = vM03;
+    pOutputTets[2].v[1] = vM04;
+    pOutputTets[2].v[2] = vM34;
+    pOutputTets[2].v[3] = vC;
+
+    pOutputTets[3].v[0] = vM04;
+    pOutputTets[3].v[1] = vM01;
+    pOutputTets[3].v[2] = vM14;
+    pOutputTets[3].v[3] = vC;
+
+    pOutputTets[4].v[0] = vM15;
+    pOutputTets[4].v[1] = vM25;
+    pOutputTets[4].v[2] = vM12;
+    pOutputTets[4].v[3] = vC;
+
+    pOutputTets[5].v[0] = vM25;
+    pOutputTets[5].v[1] = vM35;
+    pOutputTets[5].v[2] = vM23;
+    pOutputTets[5].v[3] = vC;
+
+    pOutputTets[6].v[0] = vM35;
+    pOutputTets[6].v[1] = vM45;
+    pOutputTets[6].v[2] = vM34;
+    pOutputTets[6].v[3] = vC;
+
+    pOutputTets[7].v[0] = vM45;
+    pOutputTets[7].v[1] = vM15;
+    pOutputTets[7].v[2] = vM14;
+    pOutputTets[7].v[3] = vC;
+
+    pOutputOcts[0].v[0] = vP0;
+    pOutputOcts[0].v[1] = vM01;
+    pOutputOcts[0].v[2] = vM02;
+    pOutputOcts[0].v[3] = vM03;
+    pOutputOcts[0].v[4] = vM04;
+    pOutputOcts[0].v[5] = vC;
+
+    pOutputOcts[5].v[0] = vP5;
+    pOutputOcts[5].v[1] = vM45;
+    pOutputOcts[5].v[2] = vM35;
+    pOutputOcts[5].v[3] = vM25;
+    pOutputOcts[5].v[4] = vM15;
+    pOutputOcts[5].v[5] = vC;
 }
 
 
