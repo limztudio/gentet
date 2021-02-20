@@ -361,6 +361,34 @@ extern "C" __declspec(dllexport) bool _cdecl TGSubdivideOct(const float* pRawInp
     pOutputOcts[0].v[4] = vM04;
     pOutputOcts[0].v[5] = vC;
 
+    pOutputOcts[1].v[0] = vP1;
+    pOutputOcts[1].v[1] = vM01;
+    pOutputOcts[1].v[2] = vM12;
+    pOutputOcts[1].v[3] = vM15;
+    pOutputOcts[1].v[4] = vM14;
+    pOutputOcts[1].v[5] = vC;
+
+    pOutputOcts[2].v[0] = vP2;
+    pOutputOcts[2].v[1] = vM02;
+    pOutputOcts[2].v[2] = vM23;
+    pOutputOcts[2].v[3] = vM25;
+    pOutputOcts[2].v[4] = vM12;
+    pOutputOcts[2].v[5] = vC;
+
+    pOutputOcts[3].v[0] = vP3;
+    pOutputOcts[3].v[1] = vM03;
+    pOutputOcts[3].v[2] = vM34;
+    pOutputOcts[3].v[3] = vM35;
+    pOutputOcts[3].v[4] = vM23;
+    pOutputOcts[3].v[5] = vC;
+
+    pOutputOcts[4].v[0] = vP4;
+    pOutputOcts[4].v[1] = vM04;
+    pOutputOcts[4].v[2] = vM14;
+    pOutputOcts[4].v[3] = vM45;
+    pOutputOcts[4].v[4] = vM34;
+    pOutputOcts[4].v[5] = vC;
+
     pOutputOcts[5].v[0] = vP5;
     pOutputOcts[5].v[1] = vM45;
     pOutputOcts[5].v[2] = vM35;
@@ -368,7 +396,6 @@ extern "C" __declspec(dllexport) bool _cdecl TGSubdivideOct(const float* pRawInp
     pOutputOcts[5].v[4] = vM15;
     pOutputOcts[5].v[5] = vC;
 }
-
 
 
 BOOL APIENTRY DllMain(
