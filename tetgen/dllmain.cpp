@@ -239,7 +239,7 @@ extern "C" __declspec(dllexport) void _cdecl TGGetTetBaryMatrices(float* vOut){
 
 // input: 4 vertices of tet
 // output: every 4 vertices of 4 tets and 6 vertices of oct
-extern "C" __declspec(dllexport) bool _cdecl TGSubdivideTet(const float* pRawInputTetVerts, float* pRawOutputTetsVerts, float* pRawOutputOctVerts){
+extern "C" __declspec(dllexport) void _cdecl TGSubdivideTet(const float* pRawInputTetVerts, float* pRawOutputTetsVerts, float* pRawOutputOctVerts){
     const auto* pInputTet = reinterpret_cast<const tetrahedron*>(pRawInputTetVerts);
 
     auto* pOutputTets = reinterpret_cast<tetrahedron*>(pRawOutputTetsVerts);
@@ -286,7 +286,7 @@ extern "C" __declspec(dllexport) bool _cdecl TGSubdivideTet(const float* pRawInp
 }
 // input: 6 vertices of oct
 // output: every 4 vertices of 8 tets and every 6 vertices of 6 octs
-extern "C" __declspec(dllexport) bool _cdecl TGSubdivideOct(const float* pRawInputOctVerts, float* pRawOutputTetsVerts, float* pRawOutputOctsVerts){
+extern "C" __declspec(dllexport) void _cdecl TGSubdivideOct(const float* pRawInputOctVerts, float* pRawOutputTetsVerts, float* pRawOutputOctsVerts){
     const auto* pInputOct = reinterpret_cast<const octahedron*>(pRawInputOctVerts);
 
     auto* pOutputTets = reinterpret_cast<tetrahedron*>(pRawOutputTetsVerts);
