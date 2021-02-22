@@ -418,7 +418,7 @@ extern "C" __declspec(dllexport) void _cdecl TGSubdivideOct(const float* pRawInp
     pOutputOcts[5].v[5] = vC;
 }
 
-extern "C" __declspec(dllexport) float _cdecl TGGetAverageTetVolume(float* pRawInputTetVerts){
+extern "C" __declspec(dllexport) float _cdecl TGGetTetVolume(float* pRawInputTetVerts){
     const auto* pInputTet = reinterpret_cast<const tetrahedron*>(pRawInputTetVerts);
 
     float3 a = { pInputTet->v[0].x - pInputTet->v[3].x, pInputTet->v[0].y - pInputTet->v[3].y, pInputTet->v[0].z - pInputTet->v[3].z };
@@ -430,8 +430,9 @@ extern "C" __declspec(dllexport) float _cdecl TGGetAverageTetVolume(float* pRawI
 
     return det;
 }
-extern "C" __declspec(dllexport) float _cdecl TGGetAverageOctVolume(float* pRawInputOctVerts){
+extern "C" __declspec(dllexport) float _cdecl TGGetOctVolume(float* pRawInputOctVerts){
     const auto* pInputOct = reinterpret_cast<const octahedron*>(pRawInputOctVerts);
+
     tetrahedron pInputTets[] = {
         {
             pInputOct->v[0],
