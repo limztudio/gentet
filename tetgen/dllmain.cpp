@@ -77,6 +77,18 @@ static float3 lcl_middle(const float3& v0, const float3& v1){
     float3 v = { (v1.x + v0.x) * 0.5f, (v1.y + v0.y) * 0.5f, (v1.z + v0.z) * 0.5f };
     return v;
 }
+static float3 lcl_centroid(const tetrahedron& oc){
+    float3 vO = { 0.f, 0.f, 0.f };
+    for(const auto& vC : oc.v){
+        vO.x += vC.x;
+        vO.y += vC.y;
+        vO.z += vC.z;
+    }
+    vO.x /= float(_countof(tetrahedron::v));
+    vO.y /= float(_countof(tetrahedron::v));
+    vO.z /= float(_countof(tetrahedron::v));
+    return vO;
+}
 static float3 lcl_centroid(const octahedron& oc){
     float3 vO = { 0.f, 0.f, 0.f };
     for(const auto& vC : oc.v){
@@ -269,13 +281,13 @@ extern "C" __declspec(dllexport) void _cdecl TGSubdivideTet(const float* pRawInp
 
     pOutputTets[2].v[0] = vP2;
     pOutputTets[2].v[1] = vM02;
-    pOutputTets[2].v[2] = vM12;
-    pOutputTets[2].v[3] = vM23;
+    pOutputTets[2].v[2] = vM23;
+    pOutputTets[2].v[3] = vM12;
 
     pOutputTets[3].v[0] = vP3;
     pOutputTets[3].v[1] = vM03;
-    pOutputTets[3].v[2] = vM13;
-    pOutputTets[3].v[3] = vM23;
+    pOutputTets[3].v[2] = vM23;
+    pOutputTets[3].v[3] = vM13;
 
     pOutputOct->v[0] = vM03;
     pOutputOct->v[1] = vM01;
@@ -314,45 +326,45 @@ extern "C" __declspec(dllexport) void _cdecl TGSubdivideOct(const float* pRawInp
 
     const auto vC = lcl_centroid(*pInputOct);
 
-    pOutputTets[0].v[0] = vM01;
-    pOutputTets[0].v[1] = vM02;
+    pOutputTets[0].v[0] = vC;
+    pOutputTets[0].v[1] = vM01;
     pOutputTets[0].v[2] = vM12;
-    pOutputTets[0].v[3] = vC;
+    pOutputTets[0].v[3] = vM02;
 
-    pOutputTets[1].v[0] = vM02;
-    pOutputTets[1].v[1] = vM03;
+    pOutputTets[1].v[0] = vC;
+    pOutputTets[1].v[1] = vM02;
     pOutputTets[1].v[2] = vM23;
-    pOutputTets[1].v[3] = vC;
+    pOutputTets[1].v[3] = vM03;
 
-    pOutputTets[2].v[0] = vM03;
-    pOutputTets[2].v[1] = vM04;
+    pOutputTets[2].v[0] = vC;
+    pOutputTets[2].v[1] = vM03;
     pOutputTets[2].v[2] = vM34;
-    pOutputTets[2].v[3] = vC;
+    pOutputTets[2].v[3] = vM04;
 
-    pOutputTets[3].v[0] = vM04;
-    pOutputTets[3].v[1] = vM01;
+    pOutputTets[3].v[0] = vC;
+    pOutputTets[3].v[1] = vM04;
     pOutputTets[3].v[2] = vM14;
-    pOutputTets[3].v[3] = vC;
+    pOutputTets[3].v[3] = vM01;
 
-    pOutputTets[4].v[0] = vM15;
-    pOutputTets[4].v[1] = vM25;
-    pOutputTets[4].v[2] = vM12;
-    pOutputTets[4].v[3] = vC;
+    pOutputTets[4].v[0] = vC;
+    pOutputTets[4].v[1] = vM12;
+    pOutputTets[4].v[2] = vM15;
+    pOutputTets[4].v[3] = vM25;
 
-    pOutputTets[5].v[0] = vM25;
-    pOutputTets[5].v[1] = vM35;
-    pOutputTets[5].v[2] = vM23;
-    pOutputTets[5].v[3] = vC;
+    pOutputTets[5].v[0] = vC;
+    pOutputTets[5].v[1] = vM23;
+    pOutputTets[5].v[2] = vM25;
+    pOutputTets[5].v[3] = vM35;
 
-    pOutputTets[6].v[0] = vM35;
-    pOutputTets[6].v[1] = vM45;
-    pOutputTets[6].v[2] = vM34;
-    pOutputTets[6].v[3] = vC;
+    pOutputTets[6].v[0] = vC;
+    pOutputTets[6].v[1] = vM34;
+    pOutputTets[6].v[2] = vM35;
+    pOutputTets[6].v[3] = vM45;
 
-    pOutputTets[7].v[0] = vM45;
-    pOutputTets[7].v[1] = vM15;
-    pOutputTets[7].v[2] = vM14;
-    pOutputTets[7].v[3] = vC;
+    pOutputTets[7].v[0] = vC;
+    pOutputTets[7].v[1] = vM14;
+    pOutputTets[7].v[2] = vM45;
+    pOutputTets[7].v[3] = vM15;
 
     pOutputOcts[0].v[0] = vP0;
     pOutputOcts[0].v[1] = vM01;
@@ -395,6 +407,47 @@ extern "C" __declspec(dllexport) void _cdecl TGSubdivideOct(const float* pRawInp
     pOutputOcts[5].v[3] = vM25;
     pOutputOcts[5].v[4] = vM15;
     pOutputOcts[5].v[5] = vC;
+}
+
+extern "C" __declspec(dllexport) float _cdecl TGGetAverageTetSpace(float* pRawInputTetVerts){
+    const auto* pInputTet = reinterpret_cast<const tetrahedron*>(pRawInputTetVerts);
+
+    const auto vC = lcl_centroid(*pInputTet);
+
+    float fLen = 0.f;
+    for(const auto& vP : pInputTet->v){
+        auto fX = (vP.x - vC.x);
+        auto fY = (vP.y - vC.y);
+        auto fZ = (vP.z - vC.z);
+
+        auto fCur = (fX * fX) + (fY * fY) + (fZ * fZ);
+        fCur = sqrtf(fCur);
+
+        fLen += fCur;
+    }
+    fLen /= (float)_countof(pInputTet->v);
+
+    return fLen;
+}
+extern "C" __declspec(dllexport) float _cdecl TGGetAverageOctSpace(float* pRawInputOctVerts){
+    const auto* pInputOct = reinterpret_cast<const octahedron*>(pRawInputOctVerts);
+
+    const auto vC = lcl_centroid(*pInputOct);
+
+    float fLen = 0.f;
+    for(const auto& vP : pInputOct->v){
+        auto fX = (vP.x - vC.x);
+        auto fY = (vP.y - vC.y);
+        auto fZ = (vP.z - vC.z);
+
+        auto fCur = (fX * fX) + (fY * fY) + (fZ * fZ);
+        fCur = sqrtf(fCur);
+
+        fLen += fCur;
+    }
+    fLen /= (float)_countof(pInputOct->v);
+
+    return fLen;
 }
 
 
