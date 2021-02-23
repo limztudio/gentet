@@ -70,7 +70,10 @@ static bool lcl_equal(const float3& lhs, const float3& rhs){
 }
 
 static float3 lcl_cross(const float3& v0, const float3& v1){
-    float3 v = { (v0.y * v1.z) - (v0.z * v1.y), (v0.z * v1.x) - (v0.x * v1.z), (v0.x * v1.y) - (v0.y * v1.x) };
+    float3 v;
+    v.x = (v0.y * v1.z) - (v0.z * v1.y);
+    v.y = (v0.z * v1.x) - (v0.x * v1.z);
+    v.z = (v0.x * v1.y) - (v0.y * v1.x);
     return v;
 }
 static float lcl_dot(const float3& v0, const float3& v1){
@@ -79,15 +82,24 @@ static float lcl_dot(const float3& v0, const float3& v1){
 }
 
 static float3 lcl_lerp(const float3& v0, const float3& v1, float t){
-    float3 v = { v0.x + t * (v1.x - v0.x), v0.y + t * (v1.y - v0.y), v0.z + t * (v1.z - v0.z) };
+    float3 v;
+    v.x = v0.x + t * (v1.x - v0.x);
+    v.y = v0.y + t * (v1.y - v0.y);
+    v.z = v0.z + t * (v1.z - v0.z);
     return v;
 }
 static float3 lcl_middle(const float3& v0, const float3& v1){
-    float3 v = { (v1.x + v0.x) * 0.5f, (v1.y + v0.y) * 0.5f, (v1.z + v0.z) * 0.5f };
+    float3 v;
+    v.x = (v1.x + v0.x) * 0.5f;
+    v.y = (v1.y + v0.y) * 0.5f;
+    v.z = (v1.z + v0.z) * 0.5f;
     return v;
 }
 static float3 lcl_centroid(const tetrahedron& oc){
-    float3 vO = { 0.f, 0.f, 0.f };
+    float3 vO;
+    vO.x = 0.f;
+    vO.y = 0.f;
+    vO.z = 0.f;
     for(const auto& vC : oc.v){
         vO.x += vC.x;
         vO.y += vC.y;
@@ -99,7 +111,10 @@ static float3 lcl_centroid(const tetrahedron& oc){
     return vO;
 }
 static float3 lcl_centroid(const octahedron& oc){
-    float3 vO = { 0.f, 0.f, 0.f };
+    float3 vO;
+    vO.x = 0.f;
+    vO.y = 0.f;
+    vO.z = 0.f;
     for(const auto& vC : oc.v){
         vO.x += vC.x;
         vO.y += vC.y;
