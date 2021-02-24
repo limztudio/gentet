@@ -153,7 +153,17 @@ static void lcl_makeBaryMatrix(const float3& v0, const float3& v1, const float3&
             r._32 = (m._12 * m._31 - m._11 * m._32) / det;
             r._33 = (m._11 * m._22 - m._12 * m._21) / det;
 
-            CopyMemory(mOut->raw, r.raw, sizeof(float3x3));
+            mOut->_11 = r._11;
+            mOut->_12 = r._21;
+            mOut->_13 = r._31;
+
+            mOut->_21 = r._12;
+            mOut->_22 = r._22;
+            mOut->_23 = r._32;
+
+            mOut->_31 = r._13;
+            mOut->_32 = r._23;
+            mOut->_33 = r._33;
         }
         else
             CopyMemory(mOut->raw, m.raw, sizeof(float3x3));
