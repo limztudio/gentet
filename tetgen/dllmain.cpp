@@ -284,6 +284,98 @@ extern "C" __declspec(dllexport) void _cdecl TGGetTetBaryMatrices(float* vOut){
 // not a good idea, but let's just hard-code to do it.
 
 // input: 4 vertices of tet
+// output: every 4 vertices of 2 tets
+extern "C" __declspec(dllexport) void _cdecl TGSliceTet(const float* pRawInputTetVerts, float* pRawOutputTetsVerts, unsigned char cFlag){
+    const auto* pInputTet = reinterpret_cast<const tetrahedron*>(pRawInputTetVerts);
+
+    auto* pOutputTets = reinterpret_cast<tetrahedron*>(pRawOutputTetsVerts);
+
+    const auto& vP0 = pInputTet->v[0];
+    const auto& vP1 = pInputTet->v[1];
+    const auto& vP2 = pInputTet->v[2];
+    const auto& vP3 = pInputTet->v[3];
+
+    if(((cFlag & 0x01) != 0) && ((cFlag & 0x02) != 0)){ // 0, 1
+        const auto vM01 = lcl_middle(vP0, vP1);
+
+        pOutputTets[0].v[0] = vP0;
+        pOutputTets[0].v[1] = vM01;
+        pOutputTets[0].v[2] = vP2;
+        pOutputTets[0].v[3] = vP3;
+
+        pOutputTets[1].v[0] = vP1;
+        pOutputTets[1].v[1] = vM01;
+        pOutputTets[1].v[2] = vP2;
+        pOutputTets[1].v[3] = vP3;
+    }
+    else if(((cFlag & 0x01) != 0) && ((cFlag & 0x04) != 0)){ // 0, 2
+        const auto vM02 = lcl_middle(vP0, vP2);
+
+        pOutputTets[0].v[0] = vP0;
+        pOutputTets[0].v[1] = vM02;
+        pOutputTets[0].v[2] = vP1;
+        pOutputTets[0].v[3] = vP3;
+
+        pOutputTets[1].v[0] = vP2;
+        pOutputTets[1].v[1] = vM02;
+        pOutputTets[1].v[2] = vP1;
+        pOutputTets[1].v[3] = vP3;
+    }
+    else if(((cFlag & 0x01) != 0) && ((cFlag & 0x08) != 0)){ // 0, 3
+        const auto vM03 = lcl_middle(vP0, vP3);
+
+        pOutputTets[0].v[0] = vP0;
+        pOutputTets[0].v[1] = vM03;
+        pOutputTets[0].v[2] = vP1;
+        pOutputTets[0].v[3] = vP2;
+
+        pOutputTets[1].v[0] = vP3;
+        pOutputTets[1].v[1] = vM03;
+        pOutputTets[1].v[2] = vP1;
+        pOutputTets[1].v[3] = vP2;
+    }
+    else if(((cFlag & 0x02) != 0) && ((cFlag & 0x04) != 0)){ // 1, 2
+        const auto vM12 = lcl_middle(vP1, vP2);
+
+        pOutputTets[0].v[0] = vP0;
+        pOutputTets[0].v[1] = vM12;
+        pOutputTets[0].v[2] = vP1;
+        pOutputTets[0].v[3] = vP3;
+
+        pOutputTets[1].v[0] = vP0;
+        pOutputTets[1].v[1] = vM12;
+        pOutputTets[1].v[2] = vP2;
+        pOutputTets[1].v[3] = vP3;
+    }
+    else if(((cFlag & 0x02) != 0) && ((cFlag & 0x08) != 0)){ // 1, 3
+        const auto vM13 = lcl_middle(vP1, vP3);
+
+        pOutputTets[0].v[0] = vP0;
+        pOutputTets[0].v[1] = vM13;
+        pOutputTets[0].v[2] = vP1;
+        pOutputTets[0].v[3] = vP2;
+
+        pOutputTets[1].v[0] = vP0;
+        pOutputTets[1].v[1] = vM13;
+        pOutputTets[1].v[2] = vP2;
+        pOutputTets[1].v[3] = vP3;
+    }
+    else if(((cFlag & 0x04) != 0) && ((cFlag & 0x08) != 0)){ // 2, 3
+        const auto vM23 = lcl_middle(vP2, vP3);
+
+        pOutputTets[0].v[0] = vP0;
+        pOutputTets[0].v[1] = vM23;
+        pOutputTets[0].v[2] = vP1;
+        pOutputTets[0].v[3] = vP3;
+
+        pOutputTets[1].v[0] = vP0;
+        pOutputTets[1].v[1] = vM23;
+        pOutputTets[1].v[2] = vP1;
+        pOutputTets[1].v[3] = vP2;
+    }
+}
+
+// input: 4 vertices of tet
 // output: every 4 vertices of 4 tets and 6 vertices of oct
 extern "C" __declspec(dllexport) void _cdecl TGSubdivideTet(const float* pRawInputTetVerts, float* pRawOutputTetsVerts, float* pRawOutputOctVerts){
     const auto* pInputTet = reinterpret_cast<const tetrahedron*>(pRawInputTetVerts);
