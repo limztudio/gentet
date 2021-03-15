@@ -1,10 +1,11 @@
 #include "pch.h"
 
 #include <vector>
-#include <unordered_map>
 
 #include <combaseapi.h>
 #include <Fade_3D.h>
+
+#include "robin_hood.h"
 
 
 #pragma pack(push, 1)
@@ -50,7 +51,7 @@ struct octahedron{
 
 
 static std::vector<FADE3D::Tet3*> glb_tetList;
-static std::unordered_map<FADE3D::Tet3*, unsigned long> glb_tetToIndex;
+static robin_hood::unordered_map<FADE3D::Tet3*, unsigned long> glb_tetToIndex;
 
 static std::vector<FADE3D::Point3> glb_tmpPointTable;
 static std::vector<float4x3> glb_tmpVertices;

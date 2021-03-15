@@ -106,6 +106,7 @@ xcopy "$(SolutionDir)lib\fade3D_$(Platform)_v141_$(Configuration).exp" "$(Soluti
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="robin_hood.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
