@@ -9,7 +9,7 @@ typedef unsigned long(_cdecl*_TGGetTetCount)(void);
 
 typedef void(_cdecl*_TGGetTetVertices)(float* vOut);
 typedef void(_cdecl*_TGGetTetIntraIndices)(unsigned long* vOut);
-typedef void(_cdecl*_TGGetTetAjacentIndices)(unsigned long* vOut);
+typedef void(_cdecl*_TGGetTetAdjacentIndices)(unsigned long* vOut);
 typedef void(_cdecl*_TGGetTetBaryMatrices)(float* vOut);
 
 
@@ -29,7 +29,7 @@ int main(){
     _TGGetTetCount TGGetTetCount = reinterpret_cast<_TGGetTetCount>(GetProcAddress(pLibrary, "TGGetTetCount"));
     _TGGetTetVertices TGGetTetVertices = reinterpret_cast<_TGGetTetVertices>(GetProcAddress(pLibrary, "TGGetTetVertices"));
     _TGGetTetIntraIndices TGGetTetIntraIndices = reinterpret_cast<_TGGetTetIntraIndices>(GetProcAddress(pLibrary, "TGGetTetIntraIndices"));
-    _TGGetTetAjacentIndices TGGetTetAjacentIndices = reinterpret_cast<_TGGetTetAjacentIndices>(GetProcAddress(pLibrary, "TGGetTetAjacentIndices"));
+    _TGGetTetAdjacentIndices TGGetTetAdjacentIndices = reinterpret_cast<_TGGetTetAdjacentIndices>(GetProcAddress(pLibrary, "TGGetTetAdjacentIndices"));
     _TGGetTetBaryMatrices TGGetTetBaryMatrices = reinterpret_cast<_TGGetTetBaryMatrices>(GetProcAddress(pLibrary, "TGGetTetBaryMatrices"));
 
     //float vertices[] = {
@@ -48,7 +48,7 @@ int main(){
     TGBuildTets(vertices, _countof(vertices));
 
     std::vector<uint4> indices(TGGetTetCount() << 2);
-    TGGetTetAjacentIndices((unsigned long*)indices.data());
+    TGGetTetAdjacentIndices((unsigned long*)indices.data());
 
     FreeLibrary(pLibrary);
     return 0;

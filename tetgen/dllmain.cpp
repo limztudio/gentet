@@ -273,7 +273,7 @@ extern "C" __declspec(dllexport) void _cdecl TGGetTetVertices(float* vOut){
 extern "C" __declspec(dllexport) void _cdecl TGGetTetIntraIndices(unsigned long* vOut){
     CopyMemory(vOut, glb_tmpIntraIndices.data(), glb_tmpIntraIndices.size() * sizeof(uint4));
 }
-extern "C" __declspec(dllexport) void _cdecl TGGetTetAjacentIndices(unsigned long* vOut){
+extern "C" __declspec(dllexport) void _cdecl TGGetTetAdjacentIndices(unsigned long* vOut){
     CopyMemory(vOut, glb_tmpTetAdjIndices.data(), glb_tmpTetAdjIndices.size() * sizeof(uint4));
 }
 extern "C" __declspec(dllexport) void _cdecl TGGetTetBaryMatrices(float* vOut){
